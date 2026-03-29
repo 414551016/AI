@@ -1,0 +1,7 @@
+path: C:/Users/LSS/Documents/114下/AI/AI-Hw1/Yolo26/dataset
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 2
+names: ['Empty', 'Occupied']

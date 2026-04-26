@@ -9,8 +9,31 @@
 除了主要實驗外，本作業亦規劃並加入四項延伸實驗以進一步分析 SimCLR 的關鍵因素。Experiment 1 探討 NT-Xent loss 中 temperature 參數對 loss curve 與 kNN monitor accuracy 的影響。Experiment 2 分析 batch size 對 contrastive learning 的影響，特別是 negative samples 數量改變時 representation learning 的差異。Experiment 3 移除 projection head，直接以 encoder output 計算 contrastive loss，以觀察 projection head 對表示品質的重要性。Experiment 4 將 CIFAR-10 上學得的 encoder 轉移至 CIFAR-100 進行 linear probing，以評估 learned representation 的跨資料集泛化能力。
 綜合而言，本作業驗證了 SimCLR 對比式自監督學習在無標註影像資料上的有效性。實驗結果顯示，self-supervised learning 能大幅優於隨機特徵表示，並學習出具良好線性可分性的 visual representations；雖然其分類表現仍低於完全監督式學習，但已展現出在缺乏標註資料時作為 representation learning 方法的實用價值與潛力。
 
+# Objective
+本次作業的目標是實作並評估一個基於自監督學習（Self-Supervised Learning, SSL）的影像表示學習框架，方法採用 SimCLR，並以 CIFAR-10 資料集作為主要實驗資料。核心目的在於探討：在不使用影像類別標籤的情況下，模型是否能透過對比式學習（contrastive learning）學到具有意義且具判別能力的影像特徵表示。
 
+在SimCLR的訓練過程中，模型會對同一張影像產生兩個不同的資料增強版本，並將它們視為正樣本對；同一個 batch 中來自不同影像的樣本則作為負樣本。透過 NT-Xent loss，模型學習使同一張影像的不同增強版本在特徵空間中更接近，而不同影像的表示則彼此分離。藉此，模型可以在無標籤資料上學習出有效的 visual representation。
 
+完成自監督訓練後，本作業會移除 SimCLR 的 projection head，保留 backbone encoder 作為特徵萃取器，並透過 linear probing 評估其學到的表示品質。也就是凍結 encoder，只訓練一個線性分類器來進行 CIFAR-10 分類，以觀察 learned representation 是否具有良好的線性可分性。此外，為了評估 SimCLR 表示學習的效果，本作業也與兩種基準方法進行比較：
+-	監督式學習模型（Supervised Learning from Scratch）：
+
+ 	使用相同的 modified ResNet-18 backbone，但直接利用 CIFAR-10 標籤從頭訓練分類模型，作為有標籤訓練下的比較基準。
+-	隨機凍結 backbone 基準模型（Random Frozen Backbone Lower-Bound Baseline）：
+
+ 	使用隨機初始化且不進行訓練的backbone，僅訓練最後的線性分類器，作為 representation learning 的下界基準。
+
+透過比較 SimCLR + linear probing、supervised learning 與 random frozen baseline 的測試準確率，本作業希望分析自監督對比式學習是否能有效學習影像特徵，並進一步理解其與監督式學習之間的效能差異。
+
+# Methodology
+本次作業採用SimCLR（[2002.05709] A Simple Framework for Contrastive Learning of Visual Representations）作為主要的自監督學習方法，並以 CIFAR-10 資料集進行影像表示學習實驗。整體方法包含三個部分：SimCLR 自監督訓練、linear probing 表示評估，以及與 supervised learning 和 random frozen baseline 的比較。
+1. SimCLR Framework：
+   SimCLR 是一種基於 contrastive learning 的自監督表示學習方法。其核心概念是：對同一張影像產生兩個不同的資料增強版本，並讓模型學習使這兩個版本在特徵空間中更接近；同時，來自不同影像的樣本則應在特徵空間中彼此分離。
+本作業的 SimCLR 訓練流程如下：
+
+首先，對每張 CIFAR-10 影像產生兩個獨立的 augmented views。這兩個 views 來自同一張原始影像，因此被視為 positive pair；同一個 batch 中其他影像的 augmented views 則作為 negative samples。接著，兩個 augmented views 會輸入同一個 encoder backbone，產生影像表示向量，再經過 projection head 映射到對比學習使用的 latent space。最後使用 NT-Xent loss 計算 contrastive loss，訓練模型使 positive pair 的 similarity 較高，negative pairs 的 similarity 較低。
+本作業使用的主要元件如下：
+
+![](images/SimCLR_Training.png)
 
 
 # 一、本次作業的核心目標

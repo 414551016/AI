@@ -1,0 +1,4 @@
+model,encoder_training,classifier_training,best_test_acc
+SSL SimCLR + linear probing,self-supervised SimCLR,linear probe only,0.844
+Supervised ResNet-18,supervised from scratch,jointly trained,0.9297
+Random frozen backbone + linear probing,none; random frozen,linear probe only,0.3441
